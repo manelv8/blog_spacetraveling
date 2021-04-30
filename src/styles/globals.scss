@@ -11,6 +11,11 @@
   --info: #BBBBBB;
   --body: #D7D7D7;
 }
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
 // TODO
 @media(max-width: 1080px){
   html{

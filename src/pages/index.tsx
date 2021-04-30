@@ -4,6 +4,7 @@ import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
 import styles from './home.module.scss';
+import {FiCalendar, FiUser} from 'react-icons/fi';
 
 interface Post {
   uid?: string;
@@ -25,10 +26,48 @@ interface HomeProps {
 }
 
 export default function Home() {
-  // TODO
-  return(
-    <h1>teste</h1>
-  )
+  return (
+    <>
+      <main className={styles.homeContainer}>
+        <div className={styles.homePosts}>
+          <a href="#">
+            <span>como criar hooks</span>
+            <p>
+              Lorem ipsum dolor sit Facilis commodi perferendis ea ex voluptatem
+              mollitia et, hic mo?
+            </p>
+            <div className={styles.homePostInfo}>
+              <FiCalendar /> <time> 29 mar 2021 </time>
+              <FiUser /> <span> davi linhares</span>
+            </div>
+          </a>
+          <a href="#">
+            <span>como criar hooks</span>
+            <p>
+              Lorem ipsum dolor sit Facilis commodi perferendis ea ex voluptatem
+              mollitia et, hic mo?
+            </p>
+            <div className={styles.homePostInfo}>
+              <FiCalendar /> <time> 29 mar 2021 </time>
+              <FiUser /> <span> davi linhares</span>
+            </div>
+          </a>
+          <a href="#">
+            <span>como criar hooks</span>
+            <p>
+              Lorem ipsum dolor sit Facilis commodi perferendis ea ex voluptatem
+              mollitia et, hic mo?
+            </p>
+            <div className={styles.homePostInfo}>
+              <FiCalendar /> <time> 29 mar 2021 </time>
+              <FiUser /> <span> davi linhares</span>
+            </div>
+          </a>
+        </div>
+        <a href="#" className={styles.homeLoadMore}>Carregar mais posts</a>
+      </main>
+    </>
+  );
 }
 
 // export const getStaticProps = async () => {
