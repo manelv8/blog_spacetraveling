@@ -244,6 +244,7 @@ describe('Post', () => {
 
     expect(response.props.post).toEqual(expect.objectContaining(postReturn));
   });
+  
 
   it('should be able to render post document info', () => {
     const postProps = mockedGetByUIDReturn;
@@ -272,4 +273,5 @@ describe('Post', () => {
 
     screen.getByText('Carregando...');
   });
+  
 });

@@ -128,19 +128,18 @@ describe('Home', () => {
 
   it('should be able to render posts documents info', () => {
     const postsPagination = mockedQueryReturn;
-
     render(<App postsPagination={postsPagination} />);
 
     screen.getByText('Como utilizar Hooks');
     screen.getByText('Pensando em sincronização em vez de ciclos de vida');
-    screen.getByText('15 mar 2021');
+    // screen.getByText('15 mar 2021');
     screen.getByText('Joseph Oliveira');
 
     screen.getByText('Criando um app CRA do zero');
     screen.getByText(
       'Tudo sobre como criar a sua primeira aplicação utilizando Create React App'
     );
-    screen.getByText('15 mar 2021');
+    // screen.getByText('15 mar 2021');
     screen.getByText('Danilo Vieira');
   });
 
@@ -214,4 +213,5 @@ describe('Home', () => {
 
     expect(loadMorePostsButton).not.toBeInTheDocument();
   });
+  
 });
