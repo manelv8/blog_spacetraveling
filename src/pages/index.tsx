@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 interface Post {
   uid?: string;
   first_publication_date: string | null;
+  first_publication_date_formatted: string | null;
   data: {
     title: string;
     subtitle: string;
@@ -34,10 +35,14 @@ interface HomeProps {
 
 
 export default function Home({postsPagination}: HomeProps) {
-  // const [listPost,setListPost] = useState<Post[]>([])
-  const [pagination, setPagination] = useState<PostPagination>(postsPagination)
+  const [listPosts,setListPosts] = useState<Post[]>([])
+  const [nextPage, setNextPage] = useState('')
+
+  // const [pagination, setPagination] = useState<PostPagination>(postsPagination)
   useEffect(()=>{
-    setPagination(postsPagination)
+    // setPagination(postsPagination)
+    setListPosts(postsPagination.results)
+    setNextPage(postsPagination.next_page)
   },[])
 
 
@@ -48,7 +53,8 @@ export default function Home({postsPagination}: HomeProps) {
         const posts = data.results.map(post => {
           return {
             uid: post.uid,
-            first_publication_date: format(
+            first_publication_date: post.first_publication_date,
+            first_publication_date_formatted: format(
               new Date(post.first_publication_date),
               'dd MMM yyyy',
               {
@@ -66,10 +72,11 @@ export default function Home({postsPagination}: HomeProps) {
           };
         });
 
-        const updatedPosts = [...pagination.results, ...posts]
-        setPagination({
-          next_page: data.next_page,
-          results: updatedPosts});
+        const updatedPosts = [...listPosts, ...posts]
+       
+          setNextPage(data.next_page)
+          setListPosts(updatedPosts)
+        
       });
   }
 
@@ -80,28 +87,35 @@ export default function Home({postsPagination}: HomeProps) {
     <>
       <main className={styles.homeContainer}>
         <div className={styles.homePosts}>
-          {pagination.results.map(post => {
+          {listPosts.map(post => {
             return (
-              <Link key={post.uid}  href={`/post/${post.uid}`}>
+              <Link key={post.uid} href={`/post/${post.uid}`}>
                 <a>
                   <span>{post.data.title}</span>
                   <p>{post.data.subtitle}</p>
                   <div className={styles.homePostInfo}>
-                    <FiCalendar /> <time> {post.first_publication_date} </time>
+                    <FiCalendar />
+                    <time> {post.first_publication_date_formatted} </time>
                     <FiUser /> <span> {post.data.author}</span>
                   </div>
                 </a>
               </Link>
             );
           })}
-          
-          
         </div>
 
-       { pagination.next_page && <a href='#' onClick={() => HandleLoadMore(pagination.next_page)} className={styles.homeLoadMore}>Carregar mais posts</a> }
+        {nextPage && (
+          <a
+            href="#"
+            onClick={() => HandleLoadMore(nextPage)}
+            className={styles.homeLoadMore}
+          >
+            Carregar mais posts
+          </a>
+        )}
       </main>
     </>
-  )
+  );
 }
 
 export const getStaticProps: GetStaticProps = async () => {
@@ -110,13 +124,14 @@ export const getStaticProps: GetStaticProps = async () => {
     Prismic.predicates.at('document.type','posts')
   ],{
     fetch:['posts.title','posts.subtitle','posts.author'],
-    pageSize:2
+    pageSize:20
   });
 
   const posts = postsResponse.results.map(post => {
     return {
       uid: post.uid,
-      first_publication_date: format(
+      first_publication_date: post.first_publication_date,
+      first_publication_date_formatted: format(
         new Date(post.first_publication_date), 'dd MMM yyyy',
        {
          locale:ptBR

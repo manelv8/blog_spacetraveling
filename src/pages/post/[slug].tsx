@@ -1,5 +1,6 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { useEffect, useState } from 'react';
+import Prismic from '@prismicio/client'
 import { getPrismicClient } from '../../services/prismic';
 import { RichText } from 'prismic-dom';
 import { format } from 'date-fns';
@@ -8,6 +9,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 import {FiCalendar, FiClock, FiUser} from 'react-icons/fi'
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
+import { useRouter } from 'next/router';
 
 interface Post {
   first_publication_date: string | null;
@@ -31,6 +33,12 @@ interface PostProps {
 }
 
 export default function Post({post}:PostProps) {
+  const router = useRouter();
+
+  if (router.isFallback) {
+    return <div>Carregando...</div>;
+  }
+
   const [readingTime,setReadingTime] = useState(0)
   useEffect(()=>{
     
@@ -51,23 +59,28 @@ export default function Post({post}:PostProps) {
   return (
     <>
       <div className={styles.container}>
-
         <div className={styles.postBanner}>
-          <img  src={post.data.banner.url} />
+          <img src={post.data.banner.url} />
         </div>
 
         <main className={styles.postContainer}>
-
           <div className={styles.postTitle}>{post.data.title}</div>
-        
+
           <div className={styles.postInfo}>
-            <FiCalendar /> <time> {post.first_publication_date} </time>
+            <FiCalendar />{' '}
+            <time> {format(
+      new Date(post.first_publication_date),
+      'dd MMM yyyy',
+      {
+        locale: ptBR,
+      }
+    )} </time>
             <FiUser /> <span> {post.data.author}</span>
-            <FiClock /><span> {readingTime} minutos </span>
+            <FiClock />
+            <span> {readingTime} min </span>
           </div>
 
           <div className={styles.postContent}>
-
             {post.data.content.map(item => {
               return (
                 <>
@@ -79,21 +92,35 @@ export default function Post({post}:PostProps) {
             })}
           </div>
         </main>
-
       </div>
     </>
   );
 }
 
-export const getStaticPaths = () => {
+export const getStaticPaths = async () => {
+  const prismic = getPrismicClient();
+  const posts = await prismic.query(
+    [Prismic.predicates.at('document.type', 'posts')],
+    {
+      fetch: ['posts.uid'],
+    }
+  );
+
+  const paths = posts.results.map(post => {
+    return{
+      params: {
+        slug: post.uid
+      }
+    }
+  })
   return {
-    paths: [],
-    fallback: 'blocking',
+    paths,
+    fallback: true
   };
 };
 
 export const getStaticProps = async ({params}) => {
-  console.log(params)
+
   const { slug } = params
   const prismic = getPrismicClient();
   const response = await prismic.getByUID('posts',String(slug),{})
@@ -101,10 +128,15 @@ export const getStaticProps = async ({params}) => {
    
 
   const post = {
-    first_publication_date: format(new Date(response.first_publication_date), 'dd MMM yyyy',
-    {
-      locale:ptBR
-    }),
+    uid: response.uid,
+    first_publication_date: response.first_publication_date,
+    // first_publication_date_formatted: format(
+    //   new Date(response.first_publication_date),
+    //   'dd MMM yyyy',
+    //   {
+    //     locale: ptBR,
+    //   }
+    // ),
     data: {
       title: response.data.title,
       banner: {
@@ -114,7 +146,7 @@ export const getStaticProps = async ({params}) => {
       content: response.data.content.map(content => {
         return {
           heading: content.heading,
-          body: [RichText.asHtml(content.body)],
+          body: [RichText.asText(content.body)],
         };
       }),
     },
@@ -126,16 +158,5 @@ export const getStaticProps = async ({params}) => {
   }
 }
 
-// export const getStaticPaths = async () => {
-//   const prismic = getPrismicClient();
-//   const posts = await prismic.query(TODO);
 
-//   // TODO
-// };
 
-// export const getStaticProps = async context => {
-//   const prismic = getPrismicClient();
-//   const response = await prismic.getByUID(TODO);
-
-//   // TODO
-// };
